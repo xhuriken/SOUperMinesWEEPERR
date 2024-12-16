@@ -29,25 +29,54 @@ class Grid:
                     self.grid[row][col] = -1  # Une mine est représentée par -1
                     break
 
-    def draw(self, surface):
-        """Affiche la grille sur l'écran, avec options pour afficher les mines."""
+    def calculate_adjacent_numbers(self):
+        """Remplit la grille avec les nombres correspondant au nombre de mines adjacentes."""
         for row in range(self.rows):
             for col in range(self.cols):
-                # Dessine les contours des cellules
+                # Si la cellule contient une mine (-1), on ignore
+                if self.grid[row][col] == -1:
+                    continue
+
+                # Compter les mines dans les cases adjacentes
+                mine_count = 0
+                for r in range(row - 1, row + 2):  # Parcourt les lignes adjacentes (-1, 0, +1)
+                    for c in range(col - 1, col + 2):  # Parcourt les colonnes adjacentes (-1, 0, +1)
+                        # Vérifie que la cellule adjacente est valide (dans les limites de la grille)
+                        if 0 <= r < self.rows and 0 <= c < self.cols:
+                            if self.grid[r][c] == -1:  # Si c'est une mine
+                                mine_count += 1
+
+                # Ajouter le nombre de mines adjacentes dans la cellule
+                self.grid[row][col] = mine_count
+
+    def draw(self, surface):
+        """Affiche la grille avec les cases, les mines et les chiffres."""
+        font = pygame.font.Font(None, 40)  # Police pour afficher les chiffres
+        for row in range(self.rows):
+            for col in range(self.cols):
+                # Dessiner les contours des cellules
                 rect = pygame.Rect(
-                    col * self.cell_size,  # Position X
-                    row * self.cell_size,  # Position Y
-                    self.cell_size,  # Largeur
-                    self.cell_size  # Hauteur
+                    col * self.cell_size,
+                    row * self.cell_size,
+                    self.cell_size,
+                    self.cell_size
                 )
-                pygame.draw.rect(surface, "white", rect, 1)  # Bordure des cases
+                pygame.draw.rect(surface, "white", rect, 1)  # Dessine la bordure des cellules
 
                 # Si la cellule contient une mine (-1), dessine un cercle rouge
                 if self.grid[row][col] == -1:
                     pygame.draw.circle(
                         surface,
-                        "red",  # Couleur de la mine
-                        (col * self.cell_size + self.cell_size // 2,  # Centre X
-                         row * self.cell_size + self.cell_size // 2),  # Centre Y
-                        self.cell_size // 3  # Rayon du cercle
+                        "red",  # Couleur rouge pour les mines
+                        (col * self.cell_size + self.cell_size // 2,
+                         row * self.cell_size + self.cell_size // 2),
+                        self.cell_size // 3
                     )
+                # Si la cellule contient un chiffre > 0, affiche le chiffre
+                elif self.grid[row][col] > 0:
+                    text = font.render(str(self.grid[row][col]), True, "yellow")  # Texte jaune
+                    text_rect = text.get_rect(center=(
+                        col * self.cell_size + self.cell_size // 2,
+                        row * self.cell_size + self.cell_size // 2
+                    ))
+                    surface.blit(text, text_rect)

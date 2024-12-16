@@ -1,5 +1,6 @@
 import pygame, sys
 from button import Button
+from grid import Grid
 
 pygame.init()
 
@@ -14,17 +15,19 @@ def get_font(size):  # Returns Press-Start-2P in the desired size
 
 
 def play():
+    grid = Grid(rows=10, cols=10, cell_size=50)  # Crée une grille 10x10, chaque cellule fait 50px
+    grid.populate_mines(mine_count=15)  # Place 15 mines au hasard
+
     while True:
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
 
-        SCREEN.fill("indigo")
+        SCREEN.fill("black")  # Fond noir pour contraster la grille
 
-        PLAY_TEXT = get_font(45).render("Y'a rien pour le moment", True, "yellow")
-        PLAY_RECT = PLAY_TEXT.get_rect(center=(640, 260))
-        SCREEN.blit(PLAY_TEXT, PLAY_RECT)
+        # Dessiner la grille à l'écran
+        grid.draw(SCREEN)
 
-        PLAY_BACK = Button(image=None, pos=(640, 460),
-                           text_input="RETOUR", font=get_font(75), base_color="White", hovering_color="yellow")
+        PLAY_BACK = Button(image=None, pos=(640, 600),
+                           text_input="RETOUR", font=get_font(50), base_color="White", hovering_color="yellow")
 
         PLAY_BACK.changeColor(PLAY_MOUSE_POS)
         PLAY_BACK.update(SCREEN)
@@ -50,9 +53,9 @@ def main_menu():
         MENU_RECT = MENU_TEXT.get_rect(center=(640, 100))
 
         PLAY_BUTTON = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(640, 250),
-                             text_input="PLAY", font=get_font(75), base_color="white", hovering_color="White")
+                             text_input="PLAY", font=get_font(75), base_color="lemonchiffon", hovering_color="White")
         QUIT_BUTTON = Button(image=pygame.image.load("assets/Quit Rect.png"), pos=(640, 550),
-                             text_input="QUIT", font=get_font(75), base_color="white", hovering_color="White")
+                             text_input="QUIT", font=get_font(75), base_color="lemonchiffon", hovering_color="White")
 
         SCREEN.blit(MENU_TEXT, MENU_RECT)
 

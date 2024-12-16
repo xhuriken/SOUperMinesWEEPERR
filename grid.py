@@ -3,11 +3,13 @@ import random
 
 
 class Grid:
-    def __init__(self, rows, cols, cell_size):
+    def __init__(self, rows, cols, cell_size, window_width, window_height):
         self.rows = rows
         self.cols = cols
         self.cell_size = cell_size
         self.grid = self.generate_empty_grid()
+        self.offset_x = (window_width - (cols * cell_size)) // 2
+        self.offset_y = (window_height - (rows * cell_size)) // 2
 
     def generate_empty_grid(self):
         """Génère une grille vide de la taille spécifiée."""
@@ -29,14 +31,21 @@ class Grid:
                     self.grid[row][col] = -1  # Une mine est représentée par -1
                     break
 
+    def get_cell_from_position(self, x, y):
+        col = (x- self.offset_x) // self.cell_size
+        row = (y - self.offset_y) // self.cell_size
+        if 0 <= row < self.rows and 0 <= col < self.cols:
+            return row, col
+        return None  # Retourne None si le clic est hors de la grille
+
     def draw(self, surface):
         """Affiche la grille sur l'écran, avec options pour afficher les mines."""
         for row in range(self.rows):
             for col in range(self.cols):
                 # Dessine les contours des cellules
                 rect = pygame.Rect(
-                    col * self.cell_size,  # Position X
-                    row * self.cell_size,  # Position Y
+                    self.offset_x + col * self.cell_size,  # Position X
+                    self.offset_y + row * self.cell_size,  # Position Y
                     self.cell_size,  # Largeur
                     self.cell_size  # Hauteur
                 )
@@ -47,7 +56,7 @@ class Grid:
                     pygame.draw.circle(
                         surface,
                         "red",  # Couleur de la mine
-                        (col * self.cell_size + self.cell_size // 2,  # Centre X
-                         row * self.cell_size + self.cell_size // 2),  # Centre Y
+                        (self.offset_x + col * self.cell_size + self.cell_size // 2,  # Centre X
+                         self.offset_y + row * self.cell_size + self.cell_size // 2),  # Centre Y
                         self.cell_size // 3  # Rayon du cercle
                     )

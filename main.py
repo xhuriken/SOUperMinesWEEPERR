@@ -15,7 +15,7 @@ def get_font(size):  # Returns Press-Start-2P in the desired size
 
 
 def play():
-    grid = Grid(rows=10, cols=10, cell_size=50)  # Crée une grille 10x10, chaque cellule fait 50px
+    grid = Grid(rows=10, cols=10, cell_size=50, window_width=1280, window_height=720)  # Crée une grille 10x10, chaque cellule fait 50px
     grid.populate_mines(mine_count=15)  # Place 15 mines au hasard
 
     while True:
@@ -26,7 +26,7 @@ def play():
         # Dessiner la grille à l'écran
         grid.draw(SCREEN)
 
-        PLAY_BACK = Button(image=None, pos=(640, 600),
+        PLAY_BACK = Button(image=None, pos=(640, 670),
                            text_input="RETOUR", font=get_font(50), base_color="White", hovering_color="yellow")
 
         PLAY_BACK.changeColor(PLAY_MOUSE_POS)
@@ -36,9 +36,20 @@ def play():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
+            # Détecter les clics de souris
             if event.type == pygame.MOUSEBUTTONDOWN:
+                # Vérifier si le clic est sur le bouton retour
                 if PLAY_BACK.checkForInput(PLAY_MOUSE_POS):
                     main_menu()
+
+                # Vérifier si le clic est sur une cellule de la grille
+                cell = grid.get_cell_from_position(*PLAY_MOUSE_POS)
+                if cell:  # Si une cellule est cliquée
+                    row, col = cell
+                    print(f"Cellule cliquée : {row}, {col}")  # Afficher les indices de la cellule cliquée
+                    # Ajoutez ici toute logique pour interagir avec la grille
+                    # Par exemple, révéler une cellule ou marquer une mine
 
         pygame.display.update()
 

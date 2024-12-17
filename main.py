@@ -1,5 +1,7 @@
 import pygame, sys, time
 from button import Button
+from grid import Grid
+from gridGame import GridGame
 
 pygame.init()
 
@@ -52,8 +54,6 @@ def draw_text(text, font, color, surface, x, y):
     text_obj = font.render(text, True, color)
     text_rect = text_obj.get_rect(center=(x, y))
     surface.blit(text_obj, text_rect)
-
-
 #Changer theme
 def changer_theme():
     global theme_index
@@ -139,21 +139,26 @@ def afficher_decompte():
         pygame.display.flip()
         time.sleep(1)
 
-#Jouer
 def play():
     afficher_decompte()
+    grid = Grid(rows=10, cols=10, cell_size=50, window_width=1280, window_height=720)
+    gridGame = GridGame(rows=10, cols=10, cell_size=50, window_width=1280, window_height=720)# Crée une grille 10x10
+    grid.populate_mines(mine_count=15)  # Place 15 mines
+    grid.calculate_adjacent_numbers()  # Calcule les nombres des cases adjacentes
     while True:
+
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
 
-        #Mise à jour du thème
-        current_theme = THEME_KEYS[theme_index]
-        SCREEN.blit(BACKGROUND_IMAGES[current_theme], (0, 0))
-        font_color = FONT_COLORS[current_theme]
-        button_colors = BUTTON_COLORS[current_theme]
+        SCREEN.fill("black")  # Fond noir
 
-        PLAY_BACK = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(640, 460),
-                           text_input="RETOUR", font=get_font(75),
-                           base_color=button_colors["base"], hovering_color=button_colors["hover"])
+        PLAY_TEXT = get_font(45).render("Le jeu commence !", True, "red")
+        PLAY_RECT = PLAY_TEXT.get_rect(center=(640, 260))
+        SCREEN.blit(PLAY_TEXT, PLAY_RECT)
+        # Dessiner la grille avec les mines et les chiffres
+        gridGame.draw(SCREEN)
+
+        PLAY_BACK = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(640, 670),
+                           text_input="RETOUR", font=get_font(75), base_color="lemonchiffon", hovering_color="red")
 
         PLAY_BACK.changeColor(PLAY_MOUSE_POS)
         PLAY_BACK.update(SCREEN)
@@ -162,12 +167,20 @@ def play():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
+            # Détecter les clics de souris
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if PLAY_BACK.checkForInput(PLAY_MOUSE_POS):
-                    main_menu()
+                if event.button == 1:
+                    # Vérifier si le clic est sur le bouton retour
+                    if PLAY_BACK.checkForInput(PLAY_MOUSE_POS):
+                        main_menu()
 
+                    # Vérifier si le clic est sur une cellule de la grille
+                    cell = grid.get_cell_from_position(*PLAY_MOUSE_POS)
+                    if cell:  # Si une cellule est cliquée
+                        row, col = cell
+                        gridGame.changeValue(row, col, grid)
         pygame.display.update()
-
 
 #Lancement menu
 main_menu()

@@ -55,4 +55,6 @@ class GridGame:
                     ))
                     surface.blit(text, text_rect)
 
-    def changeValue(self, row, col):
+    def changeValue(self, row, col, grid_instance):
+        """Change la valeur de la grille locale avec celle de la grille dans Grid."""
+        self.grid[row][col] = grid_instance.grid[row][col]

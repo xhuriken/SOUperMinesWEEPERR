@@ -53,7 +53,7 @@ def play():
                     cell = grid.get_cell_from_position(*PLAY_MOUSE_POS)
                     if cell:  # Si une cellule est cliquée
                         row, col = cell
-                        gridGame.changeValue(row, col)
+                        gridGame.changeValue(row, col, grid)
                         print(f"Cellule cliquée : {row}, {col}")  # Afficher les indices de la cellule cliquée
                         # Ajoutez ici toute logique pour interagir avec la grille
                         # Par exemple, révéler une cellule ou marquer une mine

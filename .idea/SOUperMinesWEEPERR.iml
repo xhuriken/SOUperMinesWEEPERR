@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
+<<<<<<< HEAD
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
     </content>
+=======
+    <content url="file://$MODULE_DIR$" />
+>>>>>>> 65d3df9 (add difficulty choice in menu)
     <orderEntry type="jdk" jdkName="Python 3.13 (SOUperMinesWEEPERR)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>

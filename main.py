@@ -15,15 +15,18 @@ def get_font(size):  # Returns Press-Start-2P in the desired size
 
 
 def play():
-    grid = Grid(rows=10, cols=10, cell_size=50, window_width=1280, window_height=720)  # Crée une grille 10x10, chaque cellule fait 50px
-    grid.populate_mines(mine_count=15)  # Place 15 mines au hasard
+    grid = Grid(rows=10, cols=10, cell_size=50)  # Crée une grille 10x10
+    grid.populate_mines(mine_count=15)  # Place 15 mines
+    grid.calculate_adjacent_numbers()  # Calcule les nombres des cases adjacentes
+
+    #grid.debug_display()  # Optionnel : Affiche la grille dans la console pour vérification
 
     while True:
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
 
-        SCREEN.fill("black")  # Fond noir pour contraster la grille
+        SCREEN.fill("black")  # Fond noir
 
-        # Dessiner la grille à l'écran
+        # Dessiner la grille avec les mines et les chiffres
         grid.draw(SCREEN)
 
         PLAY_BACK = Button(image=None, pos=(640, 670),
@@ -52,6 +55,7 @@ def play():
                     # Par exemple, révéler une cellule ou marquer une mine
 
         pygame.display.update()
+
 
 
 def main_menu():

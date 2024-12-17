@@ -4,6 +4,7 @@
 <<<<<<< HEAD
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv1" />
     </content>
 =======
     <content url="file://$MODULE_DIR$" />

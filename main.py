@@ -170,14 +170,23 @@ def play():
     afficher_decompte()
     print(f"Niveau de difficulté choisi: {['Debutant', 'Avance', 'Expert'][selected_difficulty[0]]}")
     # Créez une grille de jeu
-    grid = Grid(rows=5, cols=5, cell_size=50, window_width=1280, window_height=720)
-    gridGame = GridGame(rows=5, cols=5, cell_size=50, window_width=1280,
-                        window_height=720)  # Grille de gestion de jeu
-    grid.populate_mines(mine_count=1)  # Place 15 mines
-    grid = Grid(rows=10, cols=10, cell_size=50, window_width=1280, window_height=720)
-    gridGame = GridGame(rows=10, cols=10, cell_size=50, window_width=1280, window_height=720)# Crée une grille 10x10
-    grid.populate_mines(mine_count=15)  # Place 15 mines
-    grid.calculate_adjacent_numbers()  # Calcule les nombres des cases adjacentes
+    if selected_difficulty[0] == 0:
+        grid = Grid(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720)
+        gridGame = GridGame(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720)# Crée une grille 10x10
+        grid.populate_mines(mine_count=10)  # Place 15 mines
+        grid.calculate_adjacent_numbers()  # Calcule les nombres des cases adjacentes
+    elif selected_difficulty[0] == 1:
+        grid = Grid(rows=16, cols=16, cell_size=50, window_width=1280, window_height=720)
+        gridGame = GridGame(rows=16, cols=16, cell_size=45, window_width=1280,
+                            window_height=720)  # Crée une grille 10x10
+        grid.populate_mines(mine_count=40)  # Place 40 mines
+        grid.calculate_adjacent_numbers()  # Calcule les nombres des cases adjacentes
+    else :
+        grid = Grid(rows=30, cols=16, cell_size=50, window_width=1280, window_height=720)
+        gridGame = GridGame(rows=30, cols=16, cell_size=30, window_width=1280,
+                            window_height=720)  # Crée une grille 10x10
+        grid.populate_mines(mine_count=99)  # Place 15 mines
+        grid.calculate_adjacent_numbers()  # Calcule les nombres des cases adjacentes
 
     # **Ajoutez cet appel ici**
     #gridGame.initialize_grid(grid)

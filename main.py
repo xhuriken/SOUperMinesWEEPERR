@@ -140,29 +140,49 @@ def afficher_decompte():
         time.sleep(1)
 
 def play():
-    afficher_decompte()
-    grid = Grid(rows=10, cols=10, cell_size=50, window_width=1280, window_height=720)
-    gridGame = GridGame(rows=10, cols=10, cell_size=50, window_width=1280, window_height=720)# Crée une grille 10x10
-    grid.populate_mines(mine_count=15)  # Place 15 mines
+    # Créez une grille de jeu
+    grid = Grid(rows=5, cols=5, cell_size=50, window_width=1280, window_height=720)
+    gridGame = GridGame(rows=5, cols=5, cell_size=50, window_width=1280,
+                        window_height=720)  # Grille de gestion de jeu
+    grid.populate_mines(mine_count=1)  # Place 15 mines
     grid.calculate_adjacent_numbers()  # Calcule les nombres des cases adjacentes
-    while True:
 
+    # **Ajoutez cet appel ici**
+    #gridGame.initialize_grid(grid)
+
+    # DEBUG : Affichez la grille de jeu avec les mines
+    print("Grille après ajout des mines :")
+    for row in grid.grid:
+        print(row)
+
+    while True:
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
 
-        SCREEN.fill("black")  # Fond noir
+        SCREEN.fill("black")  # Nettoyer l'écran avec un fond noir
 
-        PLAY_TEXT = get_font(45).render("Le jeu commence !", True, "red")
-        PLAY_RECT = PLAY_TEXT.get_rect(center=(640, 260))
-        SCREEN.blit(PLAY_TEXT, PLAY_RECT)
-        # Dessiner la grille avec les mines et les chiffres
+        # Dessiner la grille et son contenu
         gridGame.draw(SCREEN)
 
+        # Créer et dessiner le bouton RETOUR
         PLAY_BACK = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(640, 670),
                            text_input="RETOUR", font=get_font(75), base_color="lemonchiffon", hovering_color="red")
-
         PLAY_BACK.changeColor(PLAY_MOUSE_POS)
         PLAY_BACK.update(SCREEN)
 
+        # **Texte de fin de partie**
+        if gridGame.game_over:  # Si la partie est perdue
+            font = pygame.font.Font(None, 100)
+            text = font.render("Perdu !", True, "red")
+            text_rect = text.get_rect(center=(640, 360))  # Texte centré
+            SCREEN.blit(text, text_rect)  # Afficher le texte
+
+        elif gridGame.victory:  # Si la partie est gagnée
+            font = pygame.font.Font(None, 100)
+            text = font.render("Victoire !", True, "green")
+            text_rect = text.get_rect(center=(640, 360))  # Texte centré
+            SCREEN.blit(text, text_rect)  # Afficher le texte
+
+        # Gestion des événements
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -170,16 +190,25 @@ def play():
 
             # Détecter les clics de souris
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    # Vérifier si le clic est sur le bouton retour
-                    if PLAY_BACK.checkForInput(PLAY_MOUSE_POS):
-                        main_menu()
+                # Si on clique sur le bouton RETOUR
+                if PLAY_BACK.checkForInput(PLAY_MOUSE_POS):
+                    main_menu()
 
-                    # Vérifier si le clic est sur une cellule de la grille
-                    cell = grid.get_cell_from_position(*PLAY_MOUSE_POS)
-                    if cell:  # Si une cellule est cliquée
-                        row, col = cell
-                        gridGame.changeValue(row, col, grid)
+                # Bloquer les interactions avec la grille après la victoire ou la défaite
+                if not gridGame.game_over and not gridGame.victory:
+                    if event.button == 1:  # Clic gauche
+                        cell = grid.get_cell_from_position(*PLAY_MOUSE_POS)
+                        if cell:  # Si une cellule a été cliquée
+                            row, col = cell
+                            if not gridGame.revealed[row][col]:
+                                gridGame.changeValue(row, col, grid)
+
+                    elif event.button == 3:  # Clic droit
+                        cell = grid.get_cell_from_position(*PLAY_MOUSE_POS)
+                        if cell:
+                            row, col = cell
+                            gridGame.toggle_flag(row, col)
+
         pygame.display.update()
 
 #Lancement menu

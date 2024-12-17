@@ -1,6 +1,7 @@
 import pygame, sys
 from button import Button
 from grid import Grid
+from gridGame import GridGame
 
 pygame.init()
 
@@ -15,7 +16,8 @@ def get_font(size):  # Returns Press-Start-2P in the desired size
 
 
 def play():
-    grid = Grid(rows=10, cols=10, cell_size=50, window_width=1280, window_height=720)  # Crée une grille 10x10
+    grid = Grid(rows=10, cols=10, cell_size=50, window_width=1280, window_height=720)
+    gridGame = GridGame(rows=10, cols=10, cell_size=50, window_width=1280, window_height=720)# Crée une grille 10x10
     grid.populate_mines(mine_count=15)  # Place 15 mines
     grid.calculate_adjacent_numbers()  # Calcule les nombres des cases adjacentes
 
@@ -27,7 +29,7 @@ def play():
         SCREEN.fill("black")  # Fond noir
 
         # Dessiner la grille avec les mines et les chiffres
-        grid.draw(SCREEN)
+        gridGame.draw(SCREEN)
 
         PLAY_BACK = Button(image=None, pos=(640, 670),
                            text_input="RETOUR", font=get_font(50), base_color="White", hovering_color="yellow")
@@ -42,17 +44,19 @@ def play():
 
             # Détecter les clics de souris
             if event.type == pygame.MOUSEBUTTONDOWN:
-                # Vérifier si le clic est sur le bouton retour
-                if PLAY_BACK.checkForInput(PLAY_MOUSE_POS):
-                    main_menu()
+                if event.button == 1:
+                    # Vérifier si le clic est sur le bouton retour
+                    if PLAY_BACK.checkForInput(PLAY_MOUSE_POS):
+                        main_menu()
 
-                # Vérifier si le clic est sur une cellule de la grille
-                cell = grid.get_cell_from_position(*PLAY_MOUSE_POS)
-                if cell:  # Si une cellule est cliquée
-                    row, col = cell
-                    print(f"Cellule cliquée : {row}, {col}")  # Afficher les indices de la cellule cliquée
-                    # Ajoutez ici toute logique pour interagir avec la grille
-                    # Par exemple, révéler une cellule ou marquer une mine
+                    # Vérifier si le clic est sur une cellule de la grille
+                    cell = grid.get_cell_from_position(*PLAY_MOUSE_POS)
+                    if cell:  # Si une cellule est cliquée
+                        row, col = cell
+                        gridGame.changeValue(row, col)
+                        print(f"Cellule cliquée : {row}, {col}")  # Afficher les indices de la cellule cliquée
+                        # Ajoutez ici toute logique pour interagir avec la grille
+                        # Par exemple, révéler une cellule ou marquer une mine
 
         pygame.display.update()
 

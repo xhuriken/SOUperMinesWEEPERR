@@ -51,6 +51,14 @@ class Grid:
                 # Ajouter le nombre de mines adjacentes dans la cellule
                 self.grid[row][col] = mine_count
 
+    def get_cell_from_position(self, x, y):
+        """Retourne la cellule (ligne, colonne) depuis une position x, y."""
+        col = (x - self.offset_x) // self.cell_size
+        row = (y - self.offset_y) // self.cell_size
+        if 0 <= row < self.rows and 0 <= col < self.cols:
+            return row, col
+        return None  # Retourne None si le clic est hors de la grille
+
     def draw(self, surface):
         """Affiche la grille avec les cases, les mines et les chiffres."""
         font = pygame.font.Font(None, 40)  # Police pour afficher les chiffres
@@ -58,8 +66,8 @@ class Grid:
             for col in range(self.cols):
                 # Dessiner les contours des cellules
                 rect = pygame.Rect(
-                    col * self.cell_size,
-                    row * self.cell_size,
+                    self.offset_x + col * self.cell_size,
+                    self.offset_y + row * self.cell_size,
                     self.cell_size,
                     self.cell_size
                 )
@@ -70,15 +78,16 @@ class Grid:
                     pygame.draw.circle(
                         surface,
                         "red",  # Couleur rouge pour les mines
-                        (col * self.cell_size + self.cell_size // 2,
-                         row * self.cell_size + self.cell_size // 2),
+                        (
+                        self.offset_x + col * self.cell_size + self.cell_size // 2,
+                        self.offset_y + row * self.cell_size + self.cell_size // 2),
                         self.cell_size // 3
                     )
                 # Si la cellule contient un chiffre > 0, affiche le chiffre
                 elif self.grid[row][col] > 0:
                     text = font.render(str(self.grid[row][col]), True, "yellow")  # Texte jaune
                     text_rect = text.get_rect(center=(
-                        col * self.cell_size + self.cell_size // 2,
-                        row * self.cell_size + self.cell_size // 2
+                        self.offset_x + col * self.cell_size + self.cell_size // 2,
+                        self.offset_y + row * self.cell_size + self.cell_size // 2
                     ))
                     surface.blit(text, text_rect)

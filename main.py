@@ -15,7 +15,7 @@ def get_font(size):  # Returns Press-Start-2P in the desired size
 
 
 def play():
-    grid = Grid(rows=10, cols=10, cell_size=50)  # Crée une grille 10x10
+    grid = Grid(rows=10, cols=10, cell_size=50, window_width=1280, window_height=720)  # Crée une grille 10x10
     grid.populate_mines(mine_count=15)  # Place 15 mines
     grid.calculate_adjacent_numbers()  # Calcule les nombres des cases adjacentes
 

@@ -1,5 +1,7 @@
 import pygame, sys, time
 from button import Button
+from grid import Grid
+from gridGame import GridGame
 
 pygame.init()
 
@@ -13,7 +15,6 @@ sunshine_song = pygame.mixer.Sound("assets/sunshine.ogg")
 sunshine_song.play()
 
 
-# Fonction pour obtenir une police
 def get_font(size):
     return pygame.font.Font("assets/norwester.otf", size)
 
@@ -37,17 +38,24 @@ def afficher_decompte():
 
 
 def play():
-    afficher_decompte()  # Affiche le décompte avant de démarrer le jeu
+    #afficher_decompte()  # Affiche le décompte avant de démarrer le jeu
+    grid = Grid(rows=10, cols=10, cell_size=50, window_width=1280, window_height=720)
+    gridGame = GridGame(rows=10, cols=10, cell_size=50, window_width=1280, window_height=720)# Crée une grille 10x10
+    grid.populate_mines(mine_count=15)  # Place 15 mines
+    grid.calculate_adjacent_numbers()  # Calcule les nombres des cases adjacentes
     while True:
+
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
 
-        SCREEN.fill("lemonchiffon")
+        SCREEN.fill("black")  # Fond noir
 
         PLAY_TEXT = get_font(45).render("Le jeu commence !", True, "red")
         PLAY_RECT = PLAY_TEXT.get_rect(center=(640, 260))
         SCREEN.blit(PLAY_TEXT, PLAY_RECT)
+        # Dessiner la grille avec les mines et les chiffres
+        gridGame.draw(SCREEN)
 
-        PLAY_BACK = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(640, 460),
+        PLAY_BACK = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(640, 670),
                            text_input="RETOUR", font=get_font(75), base_color="lemonchiffon", hovering_color="red")
 
         PLAY_BACK.changeColor(PLAY_MOUSE_POS)
@@ -57,13 +65,20 @@ def play():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
+            # Détecter les clics de souris
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if PLAY_BACK.checkForInput(PLAY_MOUSE_POS):
-                    main_menu()
+                if event.button == 1:
+                    # Vérifier si le clic est sur le bouton retour
+                    if PLAY_BACK.checkForInput(PLAY_MOUSE_POS):
+                        main_menu()
 
+                    # Vérifier si le clic est sur une cellule de la grille
+                    cell = grid.get_cell_from_position(*PLAY_MOUSE_POS)
+                    if cell:  # Si une cellule est cliquée
+                        row, col = cell
+                        gridGame.changeValue(row, col, grid)
         pygame.display.update()
-
-
 
 # Fonction pour gérer le menu principal
 def main_menu():

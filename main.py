@@ -2,6 +2,7 @@ import pygame, sys, time
 from button import Button
 from grid import Grid
 from gridGame import GridGame
+import json
 
 pygame.init()
 
@@ -165,54 +166,116 @@ def afficher_decompte():
         pygame.display.flip()
         time.sleep(1)
 
+def question(grid_content,elapsed_time):
+    pseudo = ""  # Stocke le pseudo saisi
+    saisie_active = True  # Indique si la saisie est active
+    message = "Entrez votre pseudo :"
+    while saisie_active:  # Tant que la saisie est active
+        for event in pygame.event.get():  # Boucle pour capturer tous les événements
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:  # Valider avec Entrée
+                    saisie_active = False
+                    message = f"Pseudo enregistré : {pseudo}"
+                    enregistrer_pseudo(pseudo,grid_content,elapsed_time)
+                elif event.key == pygame.K_BACKSPACE:  # Effacer le dernier caractère
+                    pseudo = pseudo[:-1]
+                else:  # Ajouter la lettre tapée au pseudo
+                    pseudo += event.unicode
+
+            font = pygame.font.Font(None, 75)
+            texte = font.render(f"{message} {pseudo}", True, (255, 255, 255))  # Afficher le pseudo
+            SCREEN.blit(texte, (40, 50))
+
+        pygame.display.update()
+
+def enregistrer_pseudo(pseudo,grid_content,elapsed_time):
+    fichier_json = "pseudo_data.json"
+    try:
+        with open(fichier_json, "r") as f:
+            data = json.load(f)  # Lire les données existantes
+    except (FileNotFoundError, json.JSONDecodeError):  # Si le fichier n'existe pas ou est vide
+        data = []
+    data.append({"pseudo": pseudo,
+    "niveau": selected_difficulty[0],
+    "temps": elapsed_time,
+    "grille": grid_content})
+    with open(fichier_json, "w") as f:
+        json.dump(data, f, indent=4)
+
 #Jouer
 def play():
-    afficher_decompte()
+    afficher_decompte()  # Appel au décompte avant le début du jeu
+
+    # Initialisation du timer
+    start_time = time.time()  # Début du chronomètre
+
     print(f"Niveau de difficulté choisi: {['Debutant', 'Avance', 'Expert'][selected_difficulty[0]]}")
+
     # Créez une grille de jeu
-    grid = Grid(rows=5, cols=5, cell_size=50, window_width=1280, window_height=720)
-    grid = Grid(rows=10, cols=10, cell_size=50, window_width=1280, window_height=720)
-    gridGame = GridGame(rows=10, cols=10, cell_size=50, window_width=1280, window_height=720)# Crée une grille 10x10
+    if selected_difficulty[0] == 0:
+        grid = Grid(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720)
+        gridGame = GridGame(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720)
+        grid.populate_mines(mine_count=10)
+        grid.calculate_adjacent_numbers()
+    elif selected_difficulty[0] == 1:
+        grid = Grid(rows=16, cols=16, cell_size=50, window_width=1280, window_height=720)
+        gridGame = GridGame(rows=16, cols=16, cell_size=45, window_width=1280, window_height=720)
+        grid.populate_mines(mine_count=40)
+        grid.calculate_adjacent_numbers()
+    else:
+        grid = Grid(rows=30, cols=16, cell_size=50, window_width=1280, window_height=720)
+        gridGame = GridGame(rows=30, cols=16, cell_size=30, window_width=1280, window_height=720)
+        grid.populate_mines(mine_count=99)
+        grid.calculate_adjacent_numbers()
 
-    # **Ajoutez cet appel ici**
-    #gridGame.initialize_grid(grid)
+    grid_content = grid.grid  # Stocker le contenu de la grille
 
-    # DEBUG : Affichez la grille de jeu avec les mines
-    print("Grille après ajout des mines :")
-    for row in grid.grid:
-        print(row)
-
+    running = True  # Indicateur pour garder le timer actif
     while True:
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
 
         current_theme = THEME_KEYS[theme_index]
         SCREEN.blit(BACKGROUND_IMAGES[current_theme], (0, 0))
 
+        # Chronomètre : Si le jeu est en cours, afficher le temps écoulé en secondes
+        if running:
+            elapsed_time = int(time.time() - start_time)  # Temps écoulé en secondes
+            timer_text = get_font(35).render(f"Temps : {elapsed_time} s", True, "black")
+            SCREEN.blit(timer_text, (50, 50))  # Affiche le chronomètre en haut à gauche de l'écran
+
         PLAY_TEXT = get_font(45).render("Le jeu commence !", True, "red")
         PLAY_RECT = PLAY_TEXT.get_rect(center=(640, 260))
         SCREEN.blit(PLAY_TEXT, PLAY_RECT)
+
         # Dessiner la grille avec les mines et les chiffres
         gridGame.draw(SCREEN)
 
         # Créer et dessiner le bouton RETOUR
         PLAY_BACK = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(640, 670),
-                           text_input="RETOUR", font=get_font(75), base_color="lemonchiffon", hovering_color="red")
+                           text_input="RETOUR", font=get_font(75), base_color="lemonchiffon", hovering_color="deeppink")
 
         PLAY_BACK.changeColor(PLAY_MOUSE_POS)
         PLAY_BACK.update(SCREEN)
 
-        # **Texte de fin de partie**
+        # Détection de fin de partie (victoire ou défaite)
         if gridGame.game_over:  # Si la partie est perdue
             font = pygame.font.Font(None, 100)
             text = font.render("Perdu !", True, "red")
             text_rect = text.get_rect(center=(640, 360))  # Texte centré
             SCREEN.blit(text, text_rect)  # Afficher le texte
+            running = False  # Arrêter le chronomètre
+            question(grid_content,elapsed_time)  # Appeler la fonction question après
 
         elif gridGame.victory:  # Si la partie est gagnée
             font = pygame.font.Font(None, 100)
             text = font.render("Victoire !", True, "green")
             text_rect = text.get_rect(center=(640, 360))  # Texte centré
             SCREEN.blit(text, text_rect)  # Afficher le texte
+            running = False  # Arrêter le chronomètre
+            question(grid_content,elapsed_time)  # Appeler la fonction question après
 
         # Gestion des événements
         for event in pygame.event.get():

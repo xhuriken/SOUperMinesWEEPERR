@@ -102,9 +102,12 @@ def main_menu():
         QUIT_BUTTON = Button(image=pygame.image.load("assets/Quit.png"), pos=(640, 550),
                              text_input="QUIT", font=get_font(75),
                              base_color=button_colors["base"], hovering_color=button_colors["hover"])
+        BEBETTER_BUTTON = Button(image=pygame.image.load("assets/Quit.png"), pos=(640,670),
+                             text_input="BE BETTER", font=get_font(75),
+                             base_color=button_colors["base"], hovering_color=button_colors["hover"])
 
         #Dessin des boutons
-        for button in [PLAY_BUTTON, QUIT_BUTTON]:
+        for button in [PLAY_BUTTON, QUIT_BUTTON,BEBETTER_BUTTON]:
             button.changeColor(MENU_MOUSE_POS)
             button.update(SCREEN)
 
@@ -254,8 +257,8 @@ def play():
         gridGame.draw(SCREEN)
 
         # Créer et dessiner le bouton RETOUR
-        PLAY_BACK = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(640, 670),
-                           text_input="RETOUR", font=get_font(75), base_color="lemonchiffon", hovering_color="deeppink")
+        PLAY_BACK = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(1185, 670),
+                           text_input="RETOUR", font=get_font(60), base_color="lemonchiffon", hovering_color="deeppink")
 
         PLAY_BACK.changeColor(PLAY_MOUSE_POS)
         PLAY_BACK.update(SCREEN)

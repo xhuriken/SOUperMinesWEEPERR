@@ -102,12 +102,9 @@ def main_menu():
         QUIT_BUTTON = Button(image=pygame.image.load("assets/Quit.png"), pos=(640, 550),
                              text_input="QUIT", font=get_font(75),
                              base_color=button_colors["base"], hovering_color=button_colors["hover"])
-        BEBETTER_BUTTON = Button(image=pygame.image.load("assets/Quit.png"), pos=(640,670),
-                             text_input="BE BETTER", font=get_font(75),
-                             base_color=button_colors["base"], hovering_color=button_colors["hover"])
 
-        #Dessin des boutons
-        for button in [PLAY_BUTTON, QUIT_BUTTON,BEBETTER_BUTTON]:
+        # Dessin des boutons
+        for button in [PLAY_BUTTON, QUIT_BUTTON]:
             button.changeColor(MENU_MOUSE_POS)
             button.update(SCREEN)
 
@@ -221,18 +218,12 @@ def play():
     if selected_difficulty[0] == 0:
         grid = Grid(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720)
         gridGame = GridGame(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720)
-        grid.populate_mines(mine_count=10)
-        grid.calculate_adjacent_numbers()
     elif selected_difficulty[0] == 1:
         grid = Grid(rows=16, cols=16, cell_size=50, window_width=1280, window_height=720)
         gridGame = GridGame(rows=16, cols=16, cell_size=45, window_width=1280, window_height=720)
-        grid.populate_mines(mine_count=40)
-        grid.calculate_adjacent_numbers()
     else:
         grid = Grid(rows=30, cols=16, cell_size=50, window_width=1280, window_height=720)
         gridGame = GridGame(rows=30, cols=16, cell_size=30, window_width=1280, window_height=720)
-        grid.populate_mines(mine_count=99)
-        grid.calculate_adjacent_numbers()
 
     grid_content = grid.grid  # Stocker le contenu de la grille
 

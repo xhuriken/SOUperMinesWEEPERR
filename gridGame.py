@@ -1,4 +1,5 @@
 import pygame
+import random
 
 import grid
 from grid import Grid
@@ -9,19 +10,62 @@ class GridGame:
         self.cols = cols
         self.cell_size = cell_size
         self.grid = self.generate_empty_grid()
-        self.revealed = [[False for _ in range(self.cols)] for _ in range(self.rows)]  # Pour suivre les cases révélées
+        self.revealed = [[False for _ in range(self.cols)] for _ in range(self.rows)]
         self.flags = [[False for _ in range(self.cols)] for _ in range(self.rows)]
         self.offset_x = (window_width - (cols * cell_size)) // 2
         self.offset_y = (window_height - (rows * cell_size)) // 2
         self.game_over = False
         self.victory = False
+        self.first_click = True
+        self.directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+        self.diagonal_directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+
+    def propagate_zeros(self, row, col, grid_instance, max_propagation):
+        """
+        Propage toutes les cases de valeur 0 autour d'une case initiale
+        avec une limite de propagation définie par max_propagation.
+        """
+        all_directions = self.directions
+        cells_to_check = [(row, col)]
+        visited = set()
+        propagation_count = 0
+
+        while cells_to_check:
+            current_row, current_col = cells_to_check.pop(0)
+
+            if propagation_count >= max_propagation:
+                break
+
+            if (current_row, current_col) in visited:
+                continue
+
+            visited.add((current_row, current_col))
+            propagation_count += 1
+
+            if 0 <= current_row < self.rows and 0 <= current_col < self.cols:
+                self.revealed[current_row][current_col] = True
+                self.grid[current_row][current_col] = grid_instance.grid[current_row][current_col]
+
+                if grid_instance.grid[current_row][current_col] == 0:
+                    for dr, dc in self.directions:
+                        neighbor_row, neighbor_col = current_row + dr, current_col + dc
+                        if (neighbor_row, neighbor_col) not in visited:
+                            cells_to_check.append((neighbor_row, neighbor_col))
+
+                for dr, dc in all_directions:
+                    border_row, border_col = current_row + dr, current_col + dc
+                    if (border_row, border_col) not in visited and 0 <= border_row < self.rows and 0 <= border_col < self.cols:
+                        if grid_instance.grid[border_row][border_col] > 0:
+                            self.revealed[border_row][border_col] = True
+                            self.grid[border_row][border_col] = grid_instance.grid[border_row][border_col]
+                            print(border_row, border_col)
+                            print(self.grid[border_row][border_col])
+                            print("=============")
 
     def draw(self, surface):
-        """Affiche la grille avec les cases colorées, révélées et les drapeaux."""
-        font = pygame.font.Font(None, 40)  # Police pour afficher les chiffres
+        font = pygame.font.Font(None, 40)
         for row in range(self.rows):
             for col in range(self.cols):
-                # Coordonnées de l'emplacement de la case
                 rect = pygame.Rect(
                     self.offset_x + col * self.cell_size,
                     self.offset_y + row * self.cell_size,
@@ -29,87 +73,67 @@ class GridGame:
                     self.cell_size
                 )
                 if self.revealed[row][col]:
-                    # Cases révélées : affichage transparent + contenu
-                    color = "black"  # Couleur de fond
+                    color = "black"
                     pygame.draw.rect(surface, color, rect)
-                    pygame.draw.rect(surface, "white", rect, 1)  # Bordure blanche
+                    pygame.draw.rect(surface, "white", rect, 1)
 
-                    # Contenu de la case
-                    if self.grid[row][col] == -1:  # Mine détectée
+                    if self.grid[row][col] == -1:
                         pygame.draw.circle(
                             surface,
-                            "red",  # Couleur de la mine
+                            "red",
                             (
                                 self.offset_x + col * self.cell_size + self.cell_size // 2,
                                 self.offset_y + row * self.cell_size + self.cell_size // 2),
                             self.cell_size // 3
                         )
-                    elif self.grid[row][col] > 0:  # Nombre détecté
-                        text = font.render(str(self.grid[row][col]), True, "yellow")  # Texte jaune
+                    elif self.grid[row][col] > 0:
+                        text = font.render(str(self.grid[row][col]), True, "yellow")
                         text_rect = text.get_rect(center=(
                             self.offset_x + col * self.cell_size + self.cell_size // 2,
                             self.offset_y + row * self.cell_size + self.cell_size // 2
                         ))
                         surface.blit(text, text_rect)
                 elif self.flags[row][col]:
-                    # Cases avec un drapeau
-                    color = "purple"  # Couleur de fond des cases non révélées
+                    color = "purple"
                     pygame.draw.rect(surface, color, rect)
-                    pygame.draw.rect(surface, "white", rect, 1)  # Bordure blanche
-
-                    # Dessiner un drapeau
+                    pygame.draw.rect(surface, "white", rect, 1)
                     pygame.draw.polygon(
                         surface,
-                        "red",  # Couleur du drapeau
+                        "red",
                         [
-                            # Point supérieur central
                             (self.offset_x + col * self.cell_size + self.cell_size // 2,
                              self.offset_y + row * self.cell_size + self.cell_size // 4),
-
-                            # Point supérieur droit
                             (self.offset_x + col * self.cell_size + 3 * self.cell_size // 4,
                              self.offset_y + row * self.cell_size + self.cell_size // 3),
-
-                            # Point inférieur droit
-                            (self.offset_x + col * self.cell_size + 3 * self.cell_size // 4,
-                             self.offset_y + row * self.cell_size + 2 * self.cell_size // 3),
-
-                            # Point inférieur central
                             (self.offset_x + col * self.cell_size + self.cell_size // 2,
-                             self.offset_y + row * self.cell_size + 3 * self.cell_size // 4),
-
-                            # Point inférieur gauche
-                            (self.offset_x + col * self.cell_size + self.cell_size // 4,
-                             self.offset_y + row * self.cell_size + 2 * self.cell_size // 3),
-
-                            # Point supérieur gauche
-                            (self.offset_x + col * self.cell_size + self.cell_size // 4,
-                             self.offset_y + row * self.cell_size + self.cell_size // 3),
+                             self.offset_y + row * self.cell_size + self.cell_size // 2),
                         ]
                     )
                 else:
-                    # Cases non révélées : affichage coloré
-                    color = "purple"  # Exemple : bleu pour les cases non révélées
+                    color = "purple"
                     pygame.draw.rect(surface, color, rect)
-                    pygame.draw.rect(surface, "white", rect, 1)  # Bordure blanche
+                    pygame.draw.rect(surface, "white", rect, 1)
 
     def changeValue(self, row, col, grid_instance):
-        """Révèle une case si elle ne comporte pas de drapeau ni que le jeu est terminé."""
         if self.flags[row][col] or self.game_over or self.victory:
-            return  # Ne rien faire si la case contient un drapeau, si le jeu est terminé ou si on a gagné
-
-        # Vérifier si la case est une bombe
-        if grid_instance.grid[row][col] == -1:
-            self.grid[row][col] = grid_instance.grid[row][col]  # Révéler la bombe
-            self.revealed[row][col] = True  # Marquer la case comme révélée
-            self.game_over = True  # Marquer la partie comme perdue
             return
 
-        # Révéler la case si ce n'est pas une bombe
-        self.grid[row][col] = grid_instance.grid[row][col]
-        self.revealed[row][col] = True
+        if self.first_click:
+            self.first_click = False
+            grid_instance.populate_mines_avoiding(row, col, mine_count=10)
+            grid_instance.calculate_adjacent_numbers()
+            grid_instance.grid[row][col] = 0
 
-        # Vérifier si le joueur a gagné après cette action
+        if grid_instance.grid[row][col] == 0:
+            self.propagate_zeros(row, col, grid_instance, max_propagation=10)
+        else:
+            self.grid[row][col] = grid_instance.grid[row][col]
+            self.revealed[row][col] = True
+
+        if grid_instance.grid[row][col] == -1:
+            self.game_over = True
+            return
+
         self.check_victory(grid_instance)
 
     def toggle_flag(self, row, col):
@@ -118,23 +142,12 @@ class GridGame:
             self.flags[row][col] = not self.flags[row][col]
 
     def generate_empty_grid(self):
-        """Génère une grille vide de la taille spécifiée."""
-        grid = []
-        for _ in range(self.rows):
-            row = []
-            for _ in range(self.cols):
-                row.append(0)
-            grid.append(row)
-        return grid
+        return [[0 for _ in range(self.cols)] for _ in range(self.rows)]
 
     def check_victory(self, grid_instance):
-        """Vérifie si toutes les cases non-minées ont été révélées."""
         for row in range(self.rows):
             for col in range(self.cols):
-                # Vérifier les cases non-minées (≠ -1)
-                if grid_instance.grid[row][col] != -1:
-                    # Si une case non-minée n'est ni révélée ni marquée par un drapeau, la victoire n'est pas atteinte
-                    if not self.revealed[row][col]:
-                        return False
-        self.victory = True  # Toutes les cases non-minées ont été révélées (ou les mines marquées avec un drapeau)
+                if grid_instance.grid[row][col] != -1 and not self.revealed[row][col]:
+                    return False
+        self.victory = True
         return True

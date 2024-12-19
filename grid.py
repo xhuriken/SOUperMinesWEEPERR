@@ -1,7 +1,6 @@
 import pygame
 import random
 
-
 class Grid:
     def __init__(self, rows, cols, cell_size, window_width, window_height):
         self.rows = rows
@@ -30,6 +29,18 @@ class Grid:
                 if self.grid[row][col] == 0:  # Si la cellule est vide
                     self.grid[row][col] = -1  # Une mine est représentée par -1
                     break
+
+    def populate_mines_avoiding(self, avoid_row, avoid_col, mine_count):
+
+        placed_mines = 0
+        while placed_mines < mine_count:
+            row = random.randint(0, self.rows - 1)
+            col = random.randint(0, self.cols - 1)
+
+            # Éviter la case cliquée, les cases révélées et les cellules déjà minées
+            if self.grid[row][col] == 0 and (row != avoid_row and col != avoid_col):
+                self.grid[row][col] = -1  # Ajouter une mine
+                placed_mines += 1
 
     def calculate_adjacent_numbers(self):
         """Remplit la grille avec les nombres correspondant au nombre de mines adjacentes."""

@@ -102,9 +102,12 @@ def main_menu():
         QUIT_BUTTON = Button(image=pygame.image.load("assets/Quit.png"), pos=(640, 550),
                              text_input="QUIT", font=get_font(75),
                              base_color=button_colors["base"], hovering_color=button_colors["hover"])
+        CREDIT_BUTTON = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(200, 550),
+                             text_input="CREDIT", font=get_font(75),
+                             base_color=button_colors["base"], hovering_color=button_colors["hover"])
 
         # Dessin des boutons
-        for button in [PLAY_BUTTON, QUIT_BUTTON]:
+        for button in [PLAY_BUTTON, QUIT_BUTTON, CREDIT_BUTTON]:
             button.changeColor(MENU_MOUSE_POS)
             button.update(SCREEN)
 
@@ -146,6 +149,8 @@ def main_menu():
                 if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
                     pygame.quit()
                     sys.exit()
+                if CREDIT_BUTTON.checkForInput(MENU_MOUSE_POS):
+                    credits_screen()
                 if bouton_secret_visible and SECRET_BUTTON.checkForInput(MENU_MOUSE_POS):
                     changer_theme()  # Change le thème
                     # Sélectionner une difficulté
@@ -299,6 +304,105 @@ def play():
                             gridGame.toggle_flag(row, col)
 
         pygame.display.update()
+
+
+def credits_screen():
+    pygame.init()
+    SCREEN = pygame.display.set_mode((1280, 720))
+    pygame.display.set_caption("Crédits")
+
+    # Couleurs et police
+    BG_COLOR = "black"
+    FONT_COLOR = "white"
+
+    # Polices : une pour les textes normaux, une autre pour les titres en majuscules
+    font_large = pygame.font.Font(None, 70)  # Grande police (pour les titres ou mots en majuscules)
+    font_small = pygame.font.Font(None, 50)  # Petite police (pour les textes normaux)
+
+    # Charger l'image du logo (bannière)
+    logo_image = pygame.image.load("assets/riot.png")
+    logo_image = pygame.transform.scale(logo_image, (500, 150))  # Ajuster la taille si nécessaire
+
+    # Stopper toute musique : arrête la musique du menu principal
+    pygame.mixer.music.stop()
+
+    # Charger et jouer la musique des crédits
+    pygame.mixer.music.load("assets/skibidi.mp3")  # Charger la musique
+    pygame.mixer.music.play(-1)  # Jouer en boucle (-1 pour boucle infinie)
+
+    # Crédits stylisés
+    credits = [
+        ("- STUDIOS -", "large"),  # 'large' signifie qu'on utilise font_large
+        ("AntiMajeur x Riot Games", "small"),
+        ("- DEVS -", "large"),
+        ("Destructeur200papier", "small"),
+        ("Moroje Huif", "small"),
+        ("Foudroyeur2naine", "small"),
+        ("SkibidiKing", "small"),
+        ("- GRAPHISTES -", "large"),
+        ("Chat j'ai pété", "small"),
+        ("- TESTEURS -", "large"),
+        ("Ines Gangsta", "small"),
+        ("Mamadou DesDoucette", "small"),
+        ("- SPECIAL THANKS -", "large"),
+        ("Merci aux figurants mineurs d'avoir aidé ", "small"),
+        ("au développement de ce projet", "small"),
+    ]
+
+    # Variables pour défilement
+    scroll_y = 720  # Point de départ en bas de l'écran
+    scroll_speed = 0.7  # Vitesse de défilement
+
+    # Boucle principale
+    clock = pygame.time.Clock()
+    while True:
+        SCREEN.fill(BG_COLOR)
+
+        # Gestion des événements
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                # Détection clic sur le bouton RETOUR
+                mouse_pos = pygame.mouse.get_pos()
+                if retour_rect.collidepoint(mouse_pos):
+                    pygame.mixer.music.stop()  # Arrêter la musique des crédits
+                    play_music(THEME_KEYS[theme_index])  # Relancer la musique du menu principal
+                    return  # Retourner au menu principal
+
+        # Afficher le logo (bannière) fixe en haut-centre
+        logo_rect = logo_image.get_rect(center=(640, scroll_y - 200))  # Positionner un peu avant les crédits
+        SCREEN.blit(logo_image, logo_rect)
+
+        # Affichage des crédits défilants
+        for i, (text, size) in enumerate(credits):
+            # Sélectionner la taille de la police en fonction du type (large/small)
+            if size == "large":
+                text_surface = font_large.render(text, True, FONT_COLOR)
+            else:
+                text_surface = font_small.render(text, True, FONT_COLOR)
+
+            # Calculer la position (chaque élément est espacé verticalement de 80 pixels)
+            text_rect = text_surface.get_rect(center=(640, scroll_y + i * 80))
+            SCREEN.blit(text_surface, text_rect)
+
+        # Mise à jour de la position verticale pour le défilement
+        scroll_y -= scroll_speed
+
+        # Remettre en boucle quand tout est défilé
+        if scroll_y + len(credits) * 80 < -100:  # Recommence quand tout est hors de l'écran
+            scroll_y = 720
+
+        # Bouton 'Retour' en haut à droite
+        retour_font = pygame.font.Font(None, 40)
+        retour_text = retour_font.render("RETOUR", True, "white")
+        retour_rect = retour_text.get_rect(topright=(1250, 20))  # Positionné en haut-droite
+        SCREEN.blit(retour_text, retour_rect)
+
+        # Mise à jour de l'écran
+        pygame.display.flip()
+        clock.tick(60)
 
 #Lancement menu
 main_menu()

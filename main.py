@@ -38,7 +38,7 @@ current_music = None  # Musique actuellement en lecture
 # Niveau de difficulté
 selected_difficulty = [0]  # Débutant par défaut
 
-#Jouer musique
+# Jouer musique
 def play_music(theme):
     global current_music
     if current_music:
@@ -47,29 +47,24 @@ def play_music(theme):
     current_music.play(-1)  # -1 pour jouer en boucle
 
 
-#Police
+# Police
 def get_font(size):
     return pygame.font.Font("assets/norwester.otf", size)
 
 
-#Texte
+# Texte
 def draw_text(text, font, color, surface, x, y):
     text_obj = font.render(text, True, color)
     text_rect = text_obj.get_rect(center=(x, y))
     surface.blit(text_obj, text_rect)
-#Changer theme
-def changer_theme():
-    global theme_index
-    theme_index = (theme_index + 1) % len(THEME_KEYS)  # Passe au thème suivant
-    play_music(THEME_KEYS[theme_index])  # Change la musique
 
 
-#Menu principal
+# Menu principal
 def main_menu():
     bouton_secret_visible = False  # Le bouton est invisible au début
     SECRET_KEY = pygame.K_t  # Touche pour révéler le bouton
 
-    #Bouton secret
+    # Bouton secret
     SECRET_BUTTON = Button(
         image=None,
         pos=(1150, 650),
@@ -82,7 +77,7 @@ def main_menu():
     play_music(THEME_KEYS[theme_index])  # Démarre la musique initiale
 
     while True:
-        #Mise à jour du fond et des couleurs
+        # Mise à jour du fond et des couleurs
         current_theme = THEME_KEYS[theme_index]
         SCREEN.blit(BACKGROUND_IMAGES[current_theme], (0, 0))
         font_color = FONT_COLORS[current_theme]
@@ -90,12 +85,12 @@ def main_menu():
 
         MENU_MOUSE_POS = pygame.mouse.get_pos()
 
-        #Titre
+        # Titre
         MENU_TEXT = get_font(100).render("DES MINEURS", True, font_color)
         MENU_RECT = MENU_TEXT.get_rect(center=(640, 100))
         SCREEN.blit(MENU_TEXT, MENU_RECT)
 
-        #Boutons PLAY et QUIT
+        # Boutons PLAY et QUIT
         PLAY_BUTTON = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(640, 250),
                              text_input="PLAY", font=get_font(75),
                              base_color=button_colors["base"], hovering_color=button_colors["hover"])
@@ -103,12 +98,12 @@ def main_menu():
                              text_input="QUIT", font=get_font(75),
                              base_color=button_colors["base"], hovering_color=button_colors["hover"])
 
-        #Dessin des boutons
+        # Dessin des boutons
         for button in [PLAY_BUTTON, QUIT_BUTTON]:
             button.changeColor(MENU_MOUSE_POS)
             button.update(SCREEN)
 
-        #Affichage du bouton secret
+        # Affichage du bouton secret
         if bouton_secret_visible:
             SECRET_BUTTON.changeColor(MENU_MOUSE_POS)
             SECRET_BUTTON.update(SCREEN)
@@ -132,7 +127,7 @@ def main_menu():
                 # Positionner le cercle devant l'option sélectionnée
                 pygame.draw.circle(SCREEN, (255, 20, 147), (pos + option_width // 2 - 160, 430), 20)
 
-        #Gestion des événements
+        # Gestion des événements
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -157,7 +152,7 @@ def main_menu():
         pygame.display.update()
 
 
-#Decompte
+# Decompte
 def afficher_decompte():
     current_theme = THEME_KEYS[theme_index]  # Récupère le thème actuel
     for i in range(3, 0, -1):
@@ -166,46 +161,7 @@ def afficher_decompte():
         pygame.display.flip()
         time.sleep(1)
 
-def question(grid_content,elapsed_time):
-    pseudo = ""  # Stocke le pseudo saisi
-    saisie_active = True  # Indique si la saisie est active
-    message = "Entrez votre pseudo :"
-    while saisie_active:  # Tant que la saisie est active
-        for event in pygame.event.get():  # Boucle pour capturer tous les événements
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:  # Valider avec Entrée
-                    saisie_active = False
-                    message = f"Pseudo enregistré : {pseudo}"
-                    enregistrer_pseudo(pseudo,grid_content,elapsed_time)
-                elif event.key == pygame.K_BACKSPACE:  # Effacer le dernier caractère
-                    pseudo = pseudo[:-1]
-                else:  # Ajouter la lettre tapée au pseudo
-                    pseudo += event.unicode
 
-            font = pygame.font.Font(None, 75)
-            texte = font.render(f"{message} {pseudo}", True, (255, 255, 255))  # Afficher le pseudo
-            SCREEN.blit(texte, (40, 50))
-
-        pygame.display.update()
-
-def enregistrer_pseudo(pseudo,grid_content,elapsed_time):
-    fichier_json = "pseudo_data.json"
-    try:
-        with open(fichier_json, "r") as f:
-            data = json.load(f)  # Lire les données existantes
-    except (FileNotFoundError, json.JSONDecodeError):  # Si le fichier n'existe pas ou est vide
-        data = []
-    data.append({"pseudo": pseudo,
-    "niveau": selected_difficulty[0],
-    "temps": elapsed_time,
-    "grille": grid_content})
-    with open(fichier_json, "w") as f:
-        json.dump(data, f, indent=4)
-
-#Jouer
 def play():
     afficher_decompte()  # Appel au décompte avant le début du jeu
 
@@ -214,22 +170,16 @@ def play():
 
     print(f"Niveau de difficulté choisi: {['Debutant', 'Avance', 'Expert'][selected_difficulty[0]]}")
 
-    # Créez une grille de jeu
+    # Créez une grille de jeu vide
     if selected_difficulty[0] == 0:
         grid = Grid(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720)
         gridGame = GridGame(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720)
-        grid.populate_mines(mine_count=10)
-        grid.calculate_adjacent_numbers()
     elif selected_difficulty[0] == 1:
         grid = Grid(rows=16, cols=16, cell_size=50, window_width=1280, window_height=720)
         gridGame = GridGame(rows=16, cols=16, cell_size=45, window_width=1280, window_height=720)
-        grid.populate_mines(mine_count=40)
-        grid.calculate_adjacent_numbers()
     else:
         grid = Grid(rows=30, cols=16, cell_size=50, window_width=1280, window_height=720)
         gridGame = GridGame(rows=30, cols=16, cell_size=30, window_width=1280, window_height=720)
-        grid.populate_mines(mine_count=99)
-        grid.calculate_adjacent_numbers()
 
     grid_content = grid.grid  # Stocker le contenu de la grille
 
@@ -267,7 +217,6 @@ def play():
             text_rect = text.get_rect(center=(640, 360))  # Texte centré
             SCREEN.blit(text, text_rect)  # Afficher le texte
             running = False  # Arrêter le chronomètre
-            question(grid_content,elapsed_time)  # Appeler la fonction question après
 
         elif gridGame.victory:  # Si la partie est gagnée
             font = pygame.font.Font(None, 100)
@@ -275,7 +224,6 @@ def play():
             text_rect = text.get_rect(center=(640, 360))  # Texte centré
             SCREEN.blit(text, text_rect)  # Afficher le texte
             running = False  # Arrêter le chronomètre
-            question(grid_content,elapsed_time)  # Appeler la fonction question après
 
         # Gestion des événements
         for event in pygame.event.get():
@@ -306,5 +254,5 @@ def play():
 
         pygame.display.update()
 
-#Lancement menu
+# Lancement menu
 main_menu()

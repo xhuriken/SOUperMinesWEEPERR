@@ -95,7 +95,7 @@ class GridGame:
                         ))
                         surface.blit(text, text_rect)
                 elif self.flags[row][col]:
-                    color = "purple"
+                    color = "mediumblue"
                     pygame.draw.rect(surface, color, rect)
                     pygame.draw.rect(surface, "white", rect, 1)
                     pygame.draw.polygon(
@@ -111,7 +111,7 @@ class GridGame:
                         ]
                     )
                 else:
-                    color = "purple"
+                    color = "mediumblue"
                     pygame.draw.rect(surface, color, rect)
                     pygame.draw.rect(surface, "white", rect, 1)
 

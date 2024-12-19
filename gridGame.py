@@ -123,7 +123,7 @@ class GridGame:
             grid_instance.grid[row][col] = 0
 
         if grid_instance.grid[row][col] == 0:
-            self.propagate_zeros(row, col, grid_instance, max_propagation=20)
+            self.propagate_zeros(row, col, grid_instance, max_propagation=100)
         else:
             self.grid[row][col] = grid_instance.grid[row][col]
             self.revealed[row][col] = True

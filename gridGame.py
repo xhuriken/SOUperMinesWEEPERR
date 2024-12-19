@@ -5,7 +5,7 @@ import grid
 from grid import Grid
 
 class GridGame:
-    def __init__(self, rows, cols, cell_size, window_width, window_height, mines_count):
+    def __init__(self, rows, cols, cell_size, window_width, window_height, mines_count, is_replay=False):
         self.rows = rows
         self.cols = cols
         self.cell_size = cell_size
@@ -16,10 +16,13 @@ class GridGame:
         self.offset_y = (window_height - (rows * cell_size)) // 2
         self.game_over = False
         self.victory = False
-        self.first_click = True
+        self.first_click = not is_replay  # Désactivé si le jeu est en mode replay
         self.directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
         self.diagonal_directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
         self.mines_count = mines_count
+        self.is_replay = is_replay  # Nouveau attribut pour indiquer le mode replay
+        self.first_click_position = None
+        self.replay_first_click_position = None
 
     def propagate_zeros(self, row, col, grid_instance, max_propagation):
         """
@@ -111,7 +114,11 @@ class GridGame:
                         ]
                     )
                 else:
-                    color = "mediumblue"
+                    # Si c'est en mode replay et que c'est la case spéciale
+                    if self.is_replay and self.replay_first_click_position == (row, col):
+                        color = "purple"  # Violet pour la première case cliquable
+                    else:
+                        color = "mediumblue"
                     pygame.draw.rect(surface, color, rect)
                     pygame.draw.rect(surface, "white", rect, 1)
 
@@ -119,8 +126,9 @@ class GridGame:
         if self.flags[row][col] or self.game_over or self.victory:
             return
 
-        if self.first_click:
+        if self.first_click:  # Ce bloc s'exécute uniquement en mode 'play'
             self.first_click = False
+            self.first_click_position = (row, col)
             grid_instance.populate_mines_avoiding(row, col, self.mines_count)
             grid_instance.calculate_adjacent_numbers()
             grid_instance.grid[row][col] = 0

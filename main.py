@@ -180,7 +180,7 @@ def afficher_decompte():
         pygame.display.flip()
         time.sleep(1)
 
-def question(grid_content, elapsed_time):
+def question(grid_content, elapsed_time, first_click_position):
     pseudo = ""  # Stocke le pseudo saisi
     saisie_active = True  # Indique si la saisie est active
     message = "Entrez votre pseudo :"
@@ -198,7 +198,7 @@ def question(grid_content, elapsed_time):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:  # Valider avec Entrée
                     saisie_active = False
-                    enregistrer_pseudo(pseudo, grid_content, elapsed_time)  # Sauvegarde des données
+                    enregistrer_pseudo(pseudo, grid_content, elapsed_time, first_click_position)  # Sauvegarde des données
                     main_menu()  # Retour au menu principal
                 elif event.key == pygame.K_BACKSPACE:  # Effacer une lettre
                     pseudo = pseudo[:-1]  # Supprime le dernier caractère
@@ -215,17 +215,19 @@ def question(grid_content, elapsed_time):
         pygame.display.update()  # Met à jour l'affichage pour refléter les changements
 
 
-def enregistrer_pseudo(pseudo,grid_content,elapsed_time):
+def enregistrer_pseudo(pseudo,grid_content,elapsed_time,first_click_position):
     fichier_json = "pseudo_data.json"
     try:
         with open(fichier_json, "r") as f:
             data = json.load(f)  # Lire les données existantes
     except (FileNotFoundError, json.JSONDecodeError):  # Si le fichier n'existe pas ou est vide
         data = []
-    data.append({"pseudo": pseudo,
-    "niveau": selected_difficulty[0],
-    "temps": elapsed_time,
-    "grille": grid_content})
+    data.append({
+        "pseudo": pseudo,
+        "niveau": selected_difficulty[0],
+        "temps": elapsed_time,
+        "grille": grid_content,
+        "first_click_position": first_click_position})
     with open(fichier_json, "w") as f:
         json.dump(data, f, indent=4)
 
@@ -285,7 +287,6 @@ def play():
             text_rect = text.get_rect(center=(190, 360))  # Texte centré
             SCREEN.blit(text, text_rect)  # Afficher le texte
             running = False  # Arrêter le chronomètre
-            question(grid_content, elapsed_time)  # Appeler la fonction question après
 
         elif gridGame.victory:  # Si la partie est gagnée
             font = pygame.font.Font(None, 100)
@@ -293,7 +294,7 @@ def play():
             text_rect = text.get_rect(center=(190, 360))  # Texte centré
             SCREEN.blit(text, text_rect)  # Afficher le texte
             running = False  # Arrêter le chronomètre
-            question(grid_content, elapsed_time)  # Appeler la fonction question après
+            question(grid_content, elapsed_time, gridGame.first_click_position)  # Appeler la fonction question après
 
         # Gestion des événements
         for event in pygame.event.get():
@@ -483,16 +484,20 @@ def replay_game(game):
 
     # Configure la grille et GridGame en fonction du niveau
     if niveau == 0:
-        grid =         Grid(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720)
-        gridGame = GridGame(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720, mines_count=15)
+        grid = Grid(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720)
+        gridGame = GridGame(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720, mines_count=15,
+                            is_replay=True)
     elif niveau == 1:
-        grid =         Grid(rows=16, cols=16, cell_size=45, window_width=1280, window_height=720)
-        gridGame = GridGame(rows=16, cols=16, cell_size=45, window_width=1280, window_height=720, mines_count=45)
+        grid = Grid(rows=16, cols=16, cell_size=45, window_width=1280, window_height=720)
+        gridGame = GridGame(rows=16, cols=16, cell_size=45, window_width=1280, window_height=720, mines_count=45,
+                            is_replay=True)
     else:
-        grid =         Grid(rows=30, cols=16, cell_size=30, window_width=1280, window_height=720)
-        gridGame = GridGame(rows=30, cols=16, cell_size=30, window_width=1280, window_height=720, mines_count=99)
-
+        grid = Grid(rows=30, cols=16, cell_size=30, window_width=1280, window_height=720)
+        gridGame = GridGame(rows=30, cols=16, cell_size=30, window_width=1280, window_height=720, mines_count=99,
+                            is_replay=True)
     grid.grid = grid_content  # Charger la grille sauvegardée
+    gridGame.replay_first_click_position = tuple(
+        game["first_click_position"])
     running = True
 
     while True:
@@ -520,7 +525,6 @@ def replay_game(game):
             text_rect = text.get_rect(center=(190, 360))  # Texte centré
             SCREEN.blit(text, text_rect)  # Afficher le texte
             running = False  # Arrêter le chronomètre
-            question(grid_content, elapsed_time)  # Appeler la fonction question après
 
         elif gridGame.victory:  # Si la partie est gagnée
             font = pygame.font.Font(None, 100)
@@ -528,7 +532,7 @@ def replay_game(game):
             text_rect = text.get_rect(center=(190, 360))  # Texte centré
             SCREEN.blit(text, text_rect)  # Afficher le texte
             running = False  # Arrêter le chronomètre
-            question(grid_content, elapsed_time)  # Appeler la fonction question après
+            question(grid_content, elapsed_time, first_click_position)  # Appeler la fonction question après
 
         # Gestion des événements
         for event in pygame.event.get():
@@ -542,20 +546,30 @@ def replay_game(game):
                 if PLAY_BACK.checkForInput(PLAY_MOUSE_POS):
                     main_menu()
 
-                # Bloquer les interactions avec la grille après la victoire ou la défaite
+                # Gestion des clics sur la grille
                 if not gridGame.game_over and not gridGame.victory:
-                    if event.button == 1:  # Clic gauche
+                    if gridGame.is_replay and gridGame.replay_first_click_position:
+                        # Si c'est un replay et qu'une case violette doit être cliquée
                         cell = grid.get_cell_from_position(*PLAY_MOUSE_POS)
-                        if cell:  # Si une cellule a été cliquée
+                        if cell == gridGame.replay_first_click_position:
+                            # L'utilisateur a cliqué sur la case violette
                             row, col = cell
-                            if not gridGame.revealed[row][col]:
-                                gridGame.changeValue(row, col, grid)
+                            gridGame.changeValue(row, col, grid)
+                            gridGame.replay_first_click_position = None  # Désactive la logique de blocage
+                    elif not gridGame.replay_first_click_position:
+                        # Si on n'est pas en mode "case violette", logique normale
+                        if event.button == 1:  # Clic gauche
+                            cell = grid.get_cell_from_position(*PLAY_MOUSE_POS)
+                            if cell:  # Si une cellule a été cliquée
+                                row, col = cell
+                                if not gridGame.revealed[row][col]:
+                                    gridGame.changeValue(row, col, grid)
 
-                    elif event.button == 3:  # Clic droit
-                        cell = grid.get_cell_from_position(*PLAY_MOUSE_POS)
-                        if cell:
-                            row, col = cell
-                            gridGame.toggle_flag(row, col)
+                        elif event.button == 3:  # Clic droit
+                            cell = grid.get_cell_from_position(*PLAY_MOUSE_POS)
+                            if cell:
+                                row, col = cell
+                                gridGame.toggle_flag(row, col)
 
         pygame.display.update()
 #Lancement menu

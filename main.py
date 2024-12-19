@@ -18,12 +18,12 @@ BACKGROUND_IMAGES = {
 
 FONT_COLORS = {
     "normal": "deeppink",
-    "troll": "yellow",
+    "troll": "orange",
 }
 
 BUTTON_COLORS = {
     "normal": {"base": "pink", "hover": "deeppink"},
-    "troll": {"base": "lemonchiffon", "hover": "yellow"},
+    "troll": {"base": "gold", "hover": "orange"},
 }
 
 MUSICS = {
@@ -124,13 +124,13 @@ def main_menu():
         for i, (text, pos) in enumerate(zip(options, range(start_x, start_x + total_width, option_width))):
             button = Button(image=None, pos=(pos + option_width // 2, 425),
                             text_input=text, font=get_font(40),
-                            base_color="pink", hovering_color="deeppink")
+                            base_color=button_colors["base"], hovering_color=button_colors["hover"])
             button.changeColor(MENU_MOUSE_POS)
             button.update(SCREEN)
 
             if i == selected_difficulty[0]:
                 # Positionner le cercle devant l'option sélectionnée
-                pygame.draw.circle(SCREEN, (255, 20, 147), (pos + option_width // 2 - 160, 430), 20)
+                pygame.draw.circle(SCREEN, (0, 0, 0), (pos + option_width // 2 - 160, 430), 20)
 
         #Gestion des événements
         for event in pygame.event.get():
@@ -185,8 +185,8 @@ def question(grid_content,elapsed_time):
                 else:  # Ajouter la lettre tapée au pseudo
                     pseudo += event.unicode
 
-            font = pygame.font.Font(None, 75)
-            texte = font.render(f"{message} {pseudo}", True, (255, 255, 255))  # Afficher le pseudo
+            font = pygame.font.Font(None, 40)
+            texte = font.render(f"{message} {pseudo}", True, (0, 0, 0))  # Afficher le pseudo
             SCREEN.blit(texte, (40, 50))
 
         pygame.display.update()
@@ -238,7 +238,7 @@ def play():
         if running:
             elapsed_time = int(time.time() - start_time)  # Temps écoulé en secondes
             timer_text = get_font(35).render(f"Temps : {elapsed_time} s", True, "black")
-            SCREEN.blit(timer_text, (50, 50))  # Affiche le chronomètre en haut à gauche de l'écran
+            SCREEN.blit(timer_text, (1090, 40))  # Affiche le chronomètre en haut à gauche de l'écran
 
         PLAY_TEXT = get_font(45).render("Le jeu commence !", True, "red")
         PLAY_RECT = PLAY_TEXT.get_rect(center=(640, 260))

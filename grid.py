@@ -67,5 +67,6 @@ class Grid:
         col = (x - self.offset_x) // self.cell_size
         row = (y - self.offset_y) // self.cell_size
         if 0 <= row < self.rows and 0 <= col < self.cols:
+            print(row, col)
             return row, col
         return None  # Retourne None si le clic est hors de la grille

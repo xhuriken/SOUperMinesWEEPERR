@@ -59,9 +59,6 @@ class GridGame:
                         if grid_instance.grid[border_row][border_col] > 0:
                             self.revealed[border_row][border_col] = True
                             self.grid[border_row][border_col] = grid_instance.grid[border_row][border_col]
-                            print(border_row, border_col)
-                            print(self.grid[border_row][border_col])
-                            print("=============")
 
     def draw(self, surface):
         font = pygame.font.Font(None, 40)

@@ -99,15 +99,19 @@ def main_menu():
         PLAY_BUTTON = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(640, 250),
                              text_input="PLAY", font=get_font(75),
                              base_color=button_colors["base"], hovering_color=button_colors["hover"])
-        QUIT_BUTTON = Button(image=pygame.image.load("assets/Quit.png"), pos=(640, 550),
+        QUIT_BUTTON = Button(image=pygame.image.load("assets/Quit.png"), pos=(640, 600),
                              text_input="QUIT", font=get_font(75),
                              base_color=button_colors["base"], hovering_color=button_colors["hover"])
         CREDIT_BUTTON = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(200, 550),
                              text_input="CREDIT", font=get_font(75),
                              base_color=button_colors["base"], hovering_color=button_colors["hover"])
+        SAVED_GAMES_BUTTON = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(1080, 550),
+                                    text_input="BEBETTER", font=get_font(75),
+                                    base_color=button_colors["base"], hovering_color=button_colors["hover"])
+
 
         # Dessin des boutons
-        for button in [PLAY_BUTTON, QUIT_BUTTON, CREDIT_BUTTON]:
+        for button in [PLAY_BUTTON, QUIT_BUTTON, CREDIT_BUTTON, SAVED_GAMES_BUTTON]:
             button.changeColor(MENU_MOUSE_POS)
             button.update(SCREEN)
 
@@ -151,6 +155,8 @@ def main_menu():
                     sys.exit()
                 if CREDIT_BUTTON.checkForInput(MENU_MOUSE_POS):
                     credits_screen()
+                if SAVED_GAMES_BUTTON.checkForInput(MENU_MOUSE_POS):
+                    load_saved_games()
                 if bouton_secret_visible and SECRET_BUTTON.checkForInput(MENU_MOUSE_POS):
                     changer_theme()  # Change le thème
                     # Sélectionner une difficulté
@@ -183,8 +189,8 @@ def question(grid_content,elapsed_time):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:  # Valider avec Entrée
                     saisie_active = False
-                    message = f"Pseudo enregistré : {pseudo}"
                     enregistrer_pseudo(pseudo,grid_content,elapsed_time)
+                    main_menu()
                 elif event.key == pygame.K_BACKSPACE:  # Effacer le dernier caractère
                     pseudo = pseudo[:-1]
                 else:  # Ajouter la lettre tapée au pseudo
@@ -221,13 +227,13 @@ def play():
 
     # Créez une grille de jeu
     if selected_difficulty[0] == 0:
-        grid = Grid(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720)
+        grid =         Grid(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720)
         gridGame = GridGame(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720, mines_count=15)
     elif selected_difficulty[0] == 1:
-        grid = Grid(rows=16, cols=16, cell_size=50, window_width=1280, window_height=720)
+        grid =         Grid(rows=16, cols=16, cell_size=45, window_width=1280, window_height=720)
         gridGame = GridGame(rows=16, cols=16, cell_size=45, window_width=1280, window_height=720, mines_count=45)
     else:
-        grid = Grid(rows=30, cols=16, cell_size=50, window_width=1280, window_height=720)
+        grid =         Grid(rows=30, cols=16, cell_size=30, window_width=1280, window_height=720)
         gridGame = GridGame(rows=30, cols=16, cell_size=30, window_width=1280, window_height=720, mines_count=99)
 
     grid_content = grid.grid  # Stocker le contenu de la grille
@@ -235,7 +241,6 @@ def play():
     running = True  # Indicateur pour garder le timer actif
     while True:
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
-
         current_theme = THEME_KEYS[theme_index]
         SCREEN.blit(BACKGROUND_IMAGES[current_theme], (0, 0))
 
@@ -266,7 +271,7 @@ def play():
             text_rect = text.get_rect(center=(640, 360))  # Texte centré
             SCREEN.blit(text, text_rect)  # Afficher le texte
             running = False  # Arrêter le chronomètre
-            question(grid_content,elapsed_time)  # Appeler la fonction question après
+            question(grid_content, elapsed_time)  # Appeler la fonction question après
 
         elif gridGame.victory:  # Si la partie est gagnée
             font = pygame.font.Font(None, 100)
@@ -274,7 +279,7 @@ def play():
             text_rect = text.get_rect(center=(640, 360))  # Texte centré
             SCREEN.blit(text, text_rect)  # Afficher le texte
             running = False  # Arrêter le chronomètre
-            question(grid_content,elapsed_time)  # Appeler la fonction question après
+            question(grid_content, elapsed_time)  # Appeler la fonction question après
 
         # Gestion des événements
         for event in pygame.event.get():
@@ -403,6 +408,145 @@ def credits_screen():
         # Mise à jour de l'écran
         pygame.display.flip()
         clock.tick(60)
+def load_saved_games():
+    fichier_json = "pseudo_data.json"
+    try:
+        with open(fichier_json, "r") as f:
+            data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        data = []
 
+    while True:
+        current_theme = THEME_KEYS[theme_index]
+        SCREEN.blit(BACKGROUND_IMAGES[current_theme], (0, 0))# Fond blanc
+
+        draw_text("Parties Enregistrées", get_font(50), "black", SCREEN, 640, 50)
+
+        MENU_MOUSE_POS = pygame.mouse.get_pos()
+        BACK_BUTTON = Button(image=pygame.image.load("assets/Quit.png"), pos=(100, 670),
+                             text_input="RETOUR", font=get_font(40),
+                             base_color="red", hovering_color="orange")
+
+        BACK_BUTTON.changeColor(MENU_MOUSE_POS)
+        BACK_BUTTON.update(SCREEN)
+
+        # Afficher chaque partie
+        y_offset = 150  # Position verticale de départ
+        buttons = []
+        for i, game in enumerate(data):
+            pseudo = game["pseudo"]
+            niveau = ["Débutant", "Avancé", "Expert"][game["niveau"]]
+            temps = game["temps"]
+
+            # Texte descriptif de la partie
+            draw_text(f"{pseudo} | {niveau} | {temps}s", get_font(30), "black", SCREEN, 640, y_offset)
+
+            # Créer un bouton pour rejouer la partie
+            replay_button = Button(image=pygame.image.load("assets/Play Rect.png"),
+                                    pos=(1000, y_offset),
+                                    text_input="REJOUER", font=get_font(30),
+                                    base_color="green", hovering_color="lime")
+            replay_button.changeColor(MENU_MOUSE_POS)
+            replay_button.update(SCREEN)
+            buttons.append((replay_button, game))
+            y_offset += 70
+
+        # Gestion des clics
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if BACK_BUTTON.checkForInput(MENU_MOUSE_POS):
+                    main_menu()
+                for button, game in buttons:
+                    if button.checkForInput(MENU_MOUSE_POS):
+                        replay_game(game)  # Rejouer la partie
+
+        pygame.display.update()
+def replay_game(game):
+    start_time = time.time()  # Début du chronomètre
+
+    grid_content = game["grille"]
+    niveau = game["niveau"]
+    elapsed_time = game["temps"]
+
+    # Configure la grille et GridGame en fonction du niveau
+    if niveau == 0:
+        grid =         Grid(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720)
+        gridGame = GridGame(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720, mines_count=15)
+    elif niveau == 1:
+        grid =         Grid(rows=16, cols=16, cell_size=45, window_width=1280, window_height=720)
+        gridGame = GridGame(rows=16, cols=16, cell_size=45, window_width=1280, window_height=720, mines_count=45)
+    else:
+        grid =         Grid(rows=30, cols=16, cell_size=30, window_width=1280, window_height=720)
+        gridGame = GridGame(rows=30, cols=16, cell_size=30, window_width=1280, window_height=720, mines_count=99)
+
+    grid.grid = grid_content  # Charger la grille sauvegardée
+    running = True
+
+    while True:
+        PLAY_MOUSE_POS = pygame.mouse.get_pos()
+
+        current_theme = THEME_KEYS[theme_index]
+        SCREEN.blit(BACKGROUND_IMAGES[current_theme], (0, 0))
+        print(PLAY_MOUSE_POS)
+        # Afficher la grille
+        gridGame.draw(SCREEN)
+
+        PLAY_BACK = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(1185, 670),
+                           text_input="RETOUR", font=get_font(60), base_color="lemonchiffon", hovering_color="deeppink")
+
+        PLAY_BACK.changeColor(pygame.mouse.get_pos())
+        PLAY_BACK.update(SCREEN)
+        if running:
+            elapsed_time = int(time.time() - start_time)  # Temps écoulé en secondes
+            timer_text = get_font(35).render(f"Temps : {elapsed_time} s", True, "black")
+            SCREEN.blit(timer_text, (1090, 40))  # Affiche le chronomètre en haut à gauche de l'écran
+
+        if gridGame.game_over:  # Si la partie est perdue
+            font = pygame.font.Font(None, 100)
+            text = font.render("Perdu !", True, "red")
+            text_rect = text.get_rect(center=(640, 360))  # Texte centré
+            SCREEN.blit(text, text_rect)  # Afficher le texte
+            running = False  # Arrêter le chronomètre
+            question(grid_content, elapsed_time)  # Appeler la fonction question après
+
+        elif gridGame.victory:  # Si la partie est gagnée
+            font = pygame.font.Font(None, 100)
+            text = font.render("Victoire !", True, "green")
+            text_rect = text.get_rect(center=(640, 360))  # Texte centré
+            SCREEN.blit(text, text_rect)  # Afficher le texte
+            running = False  # Arrêter le chronomètre
+            question(grid_content, elapsed_time)  # Appeler la fonction question après
+
+        # Gestion des événements
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            # Détecter les clics de souris
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # Si on clique sur le bouton RETOUR
+                if PLAY_BACK.checkForInput(PLAY_MOUSE_POS):
+                    main_menu()
+
+                # Bloquer les interactions avec la grille après la victoire ou la défaite
+                if not gridGame.game_over and not gridGame.victory:
+                    if event.button == 1:  # Clic gauche
+                        cell = grid.get_cell_from_position(*PLAY_MOUSE_POS)
+                        if cell:  # Si une cellule a été cliquée
+                            row, col = cell
+                            if not gridGame.revealed[row][col]:
+                                gridGame.changeValue(row, col, grid)
+
+                    elif event.button == 3:  # Clic droit
+                        cell = grid.get_cell_from_position(*PLAY_MOUSE_POS)
+                        if cell:
+                            row, col = cell
+                            gridGame.toggle_flag(row, col)
+
+        pygame.display.update()
 #Lancement menu
 main_menu()

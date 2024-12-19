@@ -114,9 +114,8 @@ class GridGame:
                         ]
                     )
                 else:
-                    # Si c'est en mode replay et que c'est la case spéciale
                     if self.is_replay and self.replay_first_click_position == (row, col):
-                        color = "purple"  # Violet pour la première case cliquable
+                        color = "purple"
                     else:
                         color = "mediumblue"
                     pygame.draw.rect(surface, color, rect)
@@ -126,7 +125,7 @@ class GridGame:
         if self.flags[row][col] or self.game_over or self.victory:
             return
 
-        if self.first_click:  # Ce bloc s'exécute uniquement en mode 'play'
+        if self.first_click:
             self.first_click = False
             self.first_click_position = (row, col)
             grid_instance.populate_mines_avoiding(row, col, self.mines_count)
@@ -147,7 +146,7 @@ class GridGame:
 
     def toggle_flag(self, row, col):
         """Ajoute ou enlève un drapeau sur une case."""
-        if not self.revealed[row][col]:  # Ne pas permettre le placement de drapeaux sur une case déjà révélée
+        if not self.revealed[row][col]:
             self.flags[row][col] = not self.flags[row][col]
 
     def generate_empty_grid(self):

@@ -20,12 +20,12 @@ class GridGame:
         self.directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
         self.diagonal_directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 
-    def propagate_zeros(self, row, col, grid_instance, max_propagation=10):
+    def propagate_zeros(self, row, col, grid_instance, max_propagation):
         """
         Propage toutes les cases de valeur 0 autour d'une case initiale
         avec une limite de propagation définie par max_propagation.
         """
-        all_directions = self.directions + self.diagonal_directions
+        all_directions = self.directions
         cells_to_check = [(row, col)]
         visited = set()
         propagation_count = 0
@@ -58,6 +58,9 @@ class GridGame:
                         if grid_instance.grid[border_row][border_col] > 0:
                             self.revealed[border_row][border_col] = True
                             self.grid[border_row][border_col] = grid_instance.grid[border_row][border_col]
+                            print(border_row, border_col)
+                            print(self.grid[border_row][border_col])
+                            print("=============")
 
     def draw(self, surface):
         font = pygame.font.Font(None, 40)
@@ -117,13 +120,12 @@ class GridGame:
 
         if self.first_click:
             self.first_click = False
-            revealed_positions = [(r, c) for r in range(self.rows) for c in range(self.cols) if self.revealed[r][c]]
             grid_instance.populate_mines_avoiding(row, col, mine_count=10)
             grid_instance.calculate_adjacent_numbers()
             grid_instance.grid[row][col] = 0
 
         if grid_instance.grid[row][col] == 0:
-            self.propagate_zeros(row, col, grid_instance, max_propagation=100)
+            self.propagate_zeros(row, col, grid_instance, max_propagation=10)
         else:
             self.grid[row][col] = grid_instance.grid[row][col]
             self.revealed[row][col] = True

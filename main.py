@@ -217,13 +217,13 @@ def play():
     # Créez une grille de jeu
     if selected_difficulty[0] == 0:
         grid = Grid(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720)
-        gridGame = GridGame(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720)
+        gridGame = GridGame(rows=9, cols=9, cell_size=50, window_width=1280, window_height=720, mines_count=15)
     elif selected_difficulty[0] == 1:
         grid = Grid(rows=16, cols=16, cell_size=50, window_width=1280, window_height=720)
-        gridGame = GridGame(rows=16, cols=16, cell_size=45, window_width=1280, window_height=720)
+        gridGame = GridGame(rows=16, cols=16, cell_size=45, window_width=1280, window_height=720, mines_count=45)
     else:
         grid = Grid(rows=30, cols=16, cell_size=50, window_width=1280, window_height=720)
-        gridGame = GridGame(rows=30, cols=16, cell_size=30, window_width=1280, window_height=720)
+        gridGame = GridGame(rows=30, cols=16, cell_size=30, window_width=1280, window_height=720, mines_count=99)
 
     grid_content = grid.grid  # Stocker le contenu de la grille
 

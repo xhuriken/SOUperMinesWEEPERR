@@ -5,7 +5,7 @@ import grid
 from grid import Grid
 
 class GridGame:
-    def __init__(self, rows, cols, cell_size, window_width, window_height):
+    def __init__(self, rows, cols, cell_size, window_width, window_height, mines_count):
         self.rows = rows
         self.cols = cols
         self.cell_size = cell_size
@@ -19,6 +19,7 @@ class GridGame:
         self.first_click = True
         self.directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
         self.diagonal_directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+        self.mines_count = mines_count
 
     def propagate_zeros(self, row, col, grid_instance, max_propagation):
         """
@@ -120,12 +121,12 @@ class GridGame:
 
         if self.first_click:
             self.first_click = False
-            grid_instance.populate_mines_avoiding(row, col, mine_count=10)
+            grid_instance.populate_mines_avoiding(row, col, self.mines_count)
             grid_instance.calculate_adjacent_numbers()
             grid_instance.grid[row][col] = 0
 
         if grid_instance.grid[row][col] == 0:
-            self.propagate_zeros(row, col, grid_instance, max_propagation=10)
+            self.propagate_zeros(row, col, grid_instance, max_propagation=1000)
         else:
             self.grid[row][col] = grid_instance.grid[row][col]
             self.revealed[row][col] = True

@@ -20,16 +20,6 @@ class Grid:
             grid.append(row)
         return grid
 
-    def populate_mines(self, mine_count):
-        """Ajoute un certain nombre de mines aléatoirement dans la grille."""
-        for _ in range(mine_count):
-            while True:
-                row = random.randint(0, self.rows - 1)
-                col = random.randint(0, self.cols - 1)
-                if self.grid[row][col] == 0:
-                    self.grid[row][col] = -1
-                    break
-
     def populate_mines_avoiding(self, avoid_row, avoid_col, mine_count):
 
         placed_mines = 0

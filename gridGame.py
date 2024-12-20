@@ -40,9 +40,6 @@ class GridGame:
             if propagation_count >= max_propagation:
                 break
 
-            if (current_row, current_col) in visited:
-                continue
-
             visited.add((current_row, current_col))
             propagation_count += 1
 
@@ -55,16 +52,6 @@ class GridGame:
                         neighbor_row, neighbor_col = current_row + dr, current_col + dc
                         if (neighbor_row, neighbor_col) not in visited:
                             cells_to_check.append((neighbor_row, neighbor_col))
-
-                for dr, dc in all_directions:
-                    border_row, border_col = current_row + dr, current_col + dc
-                    if (border_row, border_col) not in visited and 0 <= border_row < self.rows and 0 <= border_col < self.cols:
-                        if grid_instance.grid[border_row][border_col] > 0:
-                            self.revealed[border_row][border_col] = True
-                            self.grid[border_row][border_col] = grid_instance.grid[border_row][border_col]
-                            print(border_row, border_col)
-                            print(self.grid[border_row][border_col])
-                            print("=============")
 
     def draw(self, surface):
         font = pygame.font.Font(None, 40)

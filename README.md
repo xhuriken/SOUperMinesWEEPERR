@@ -1,2 +1,3 @@
 # SOUperMinesWEEPERR
-School project with 4members team.
+SOUperMinesWEEPERR is a video game developed in Python, featuring a dynamic graphical interface and a save system.
+
